@@ -1,0 +1,38 @@
+#!/bin/bash
+date
+pwd
+json=$(curl --silent "https://api.github.com/repos/minbrowser/min/releases/latest")
+
+BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+if [ -f "$BASE_DIR/.env" ]; then
+    . "$BASE_DIR/.env"
+fi
+
+cd "$BASE_DIR"
+
+git pull origin master
+
+current_version=""
+
+if [ -f "current_version" ]; then
+    current_version=$(cat "current_version")
+fi
+
+latest_version=$(echo "$json" | jq -r 'if .prerelease == false then .tag_name else null end')
+
+echo "$latest_version"
+
+if [ "$current_version" != "$latest_version" ]; then
+    echo "Update to $latest_version"
+    sed 's/\$version/'${latest_version}'/g' "_snapcraft.yaml" > "snapcraft.yaml"
+    echo "Updated"
+
+    git commit -a -m "Update to $latest_version"
+    git push origin master
+
+    echo "$latest_version"> "current_version"
+
+    curl -d '{"snapName":"kakoune","oldVersion":"$current_version","newVersion":"$latest_version"}' -H "Content-Type: application/json" -X POST "$URL"
+fi
+

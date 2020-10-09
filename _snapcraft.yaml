@@ -1,0 +1,30 @@
+name: Min
+version: $version
+summary: A smarter web browser.
+description: |
+  Min is a fast, minimal browser that protects your privacy. It includes an interface designed to minimize distractions, and features such as:
+
+  - Information from DuckDuckGo in the search bar.
+  - Full-text search for visited pages
+  - Ad and tracker blocking
+  - Automatic reader view
+  - Tasks (tab groups)
+  - Password manager integration
+  - Dark theme
+
+  This snap is built via the build.snapcraft.io service from the
+  snapcraft.yaml definition at https://github.com/lukewh/min-snap to
+  ensure source and build transparency.
+
+base: core18
+confinement: strict
+
+parts:
+  min:
+    source: https://github.com/minbrowser/min.git
+    source-tag: $SNAPCRAFT_PROJECT_VERSION
+    plugin: node
+
+apps:
+  min:
+    command: usr/local/bin/min
